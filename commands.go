@@ -9,7 +9,7 @@ import (
 
 var usage = &discordgo.MessageEmbed{
 	Title: "Liste des commandes disponibles",
-	Color: 0x4bfcc4,
+	Color: 0x4fd1a8,
 }
 
 func init() {
