@@ -9,7 +9,7 @@ import (
 
 var usage = &discordgo.MessageEmbed{
 	Title: "Liste des commandes disponibles",
-	Color: 0x4fd1a8,
+	Color: 0x00dbac,
 }
 
 func init() {
@@ -82,13 +82,22 @@ var commands = []Command{
 			_, err := c.Session.ChannelMessageSendEmbed(c.MessageData.ChannelID, usage)
 
 			if err != nil {
-				log.Println("error sending message embed:", err)
+				log.Println("error sending embed message:", err)
 			}
 		},
 	},
 	Command{
-		Name:        "worms",
-		Alias:       "w",
+		Name:        "wranking",
+		Alias:       "wr",
+		Description: "Prochainement...",
+		Authroles:   config.baseroles,
+		Run: func(c Command, args []string) {
+
+		},
+	},
+	Command{
+		Name:        "wstats",
+		Alias:       "ws",
 		Description: "Prochainement...",
 		Authroles:   config.baseroles,
 		Run: func(c Command, args []string) {
