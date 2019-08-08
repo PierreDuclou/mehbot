@@ -162,15 +162,40 @@ var commands = []Command{
 		},
 	},
 	Command{
-		Name:  "wgame",
-		Alias: "wg",
+		Name:        "wplayerlist",
+		Alias:       "wpl",
+		Description: "Affiche la liste des joueurs de worms enregistrés",
+		Authroles: []string{
+			config.baseroles["Guez"],
+			config.baseroles["Guezt"],
+			config.baseroles["Worms"],
+		},
+		Run: func(c Command, args []string) bool {
+			players := []wast.Player{}
+			db.Find(&players)
+			nicknames := &discordgo.MessageEmbedField{Name: "Pseudo", Inline: true}
+			ids := &discordgo.MessageEmbedField{Name: "ID Discord", Inline: true}
+			messageFields := []*discordgo.MessageEmbedField{nicknames, ids}
+
+			for _, player := range players {
+				nicknames.Value += player.Nickname + "\n"
+				ids.Value += player.ID + "\n"
+			}
+
+			sendEmbed(0, c.Session, c.MessageData.ChannelID, messageFields)
+			return true
+		},
+	},
+	Command{
+		Name:        "wgame",
+		Alias:       "wg",
+		Description: "Enregistre une nouvelle partie de worms",
 		Usage: "Format requis pour chaque ligne :\n`[*]<PSEUDO> <NOMBRE DE KILLS> <NOMBRE DE MORTS> <DÉGÂTS>`" +
 			"\n\n- L'étoile désigne le vainqueur (**unique**) de la partie." +
 			"\n- Les joueurs doivent avoir été enregistrés dans la base de données au préalable." +
 			"\n- Les résultats de la partie doivent être écrit dans un bloc de code (entouré par trois backticks)." +
 			"\n\nExemple :\n```!wg ` ` `\n*seezah 16 0 4600\nitsuped 0 8 800\ntranker 0 8 200\n` ` ` ```",
-		Description: "Enregistre une nouvelle partie de worms",
-		Authroles:   []string{config.baseroles["Superguez"]},
+		Authroles: []string{config.baseroles["Superguez"]},
 		Run: func(c Command, args []string) bool {
 			return true
 		},
