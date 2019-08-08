@@ -31,6 +31,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	log.Printf("command %s called by user \"%s\":\"%s\"\n", cmdname, m.Author.String(), m.Content)
+	log.Printf("command called by user \"%s\": %s\n", m.Author.String(), m.Content)
 	command.Execute(args)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"mehbot/wast"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -36,17 +37,27 @@ type Command struct {
 
 // Execute is a façade to execute the Run() function of the command
 func (c Command) Execute(args []string) {
+	if len(args) > 0 {
+		if args[0] == strings.ToLower("help") {
+			c.printUsage()
+			return
+		}
+	}
+
 	ok := c.Run(c, args)
 
 	if !ok {
 		log.Printf("command %s failed to execute, args: %s\n", c.Name, args)
-		sendEmbed(0, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
-				Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
-				Value: c.Description + ".\n\n" + c.Usage,
-			},
-		})
 	}
+}
+
+func (c Command) printUsage() {
+	sendEmbed(0, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+		&discordgo.MessageEmbedField{
+			Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
+			Value: c.Description + ".\n\n" + c.Usage,
+		},
+	})
 }
 
 // Authorized determines if the given message's author is authorized to send commands to the bot
@@ -78,6 +89,7 @@ func GetCommand(name string, s *discordgo.Session, m *discordgo.MessageCreate) *
 			return &command
 		}
 	}
+
 	return nil
 }
 
@@ -85,7 +97,7 @@ var commands = []Command{
 	Command{
 		Name:        "help",
 		Alias:       "h",
-		Description: "Affiche ce message d'aide",
+		Description: "Affiche la liste des commandes disponibles",
 		Authroles: []string{
 			config.baseroles["Guez"],
 			config.baseroles["Guezt"],
@@ -111,7 +123,13 @@ var commands = []Command{
 			id := args[1]
 
 			if _, err := c.Session.GuildMember(c.MessageData.GuildID, id); err != nil {
-				log.Println("error creating player:\n\t", err)
+				log.Println("error creating player:", err)
+				sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+					&discordgo.MessageEmbedField{
+						Name:  "ID Discord inconnu au bataillon",
+						Value: id,
+					},
+				})
 				return false
 			}
 
