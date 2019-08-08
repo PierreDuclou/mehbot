@@ -9,7 +9,7 @@ type Stats struct {
 	Winner   bool
 	Player   Player
 	Game     Game
-	PlayerID uint
+	PlayerID string
 	GameID   uint
 }
 

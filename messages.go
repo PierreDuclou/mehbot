@@ -24,6 +24,6 @@ func sendEmbed(messageType int, session *discordgo.Session, channelID string, fi
 	}
 
 	if _, err := session.ChannelMessageSendEmbed(channelID, message); err != nil {
-		log.Println("error sending embed message:\n\t", err)
+		log.Println("error sending embed message:", err)
 	}
 }

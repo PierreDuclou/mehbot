@@ -2,13 +2,13 @@ package main
 
 var config = struct {
 	prefix       string            // command prefix
-	baseroles    map[string]string // known discord roles
+	roles        map[string]string // known discord roles
 	messageColor int
 	successColor int
 	errorColor   int
 }{
 	prefix: "!",
-	baseroles: map[string]string{
+	roles: map[string]string{
 		"Guez":      "131380194207465472",
 		"Guezt":     "241631468432916480",
 		"Worms":     "598963803014561857",

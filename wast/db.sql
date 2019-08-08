@@ -16,7 +16,7 @@ CREATE TABLE players (
 
 CREATE TABLE games (
   id SERIAL NOT NULL,
-  created_at DATE NOT NULL,
+  created_at TIMESTAMP NOT NULL,
   PRIMARY KEY(id)
 );
 
@@ -56,3 +56,13 @@ INSERT INTO ranks (name, min_elo, max_elo) VALUES ('Barack Obanane', 120, 139);
 INSERT INTO ranks (name, min_elo, max_elo) VALUES ('Maître Bananier', 140, 159);
 INSERT INTO ranks (name, min_elo, max_elo) VALUES ('Banana Jesus', 160, 179);
 INSERT INTO ranks (name, min_elo, max_elo) VALUES ('Worms God', 180, 200);
+
+INSERT INTO players (id, nickname) VALUES ('131356859662598144', 'seezah');
+INSERT INTO players (id, nickname) VALUES ('131367902908645377', 'jsnz');
+INSERT INTO players (id, nickname) VALUES ('131809640437514240', 'salchat');
+INSERT INTO players (id, nickname) VALUES ('148841746661376000', 'martoche');
+INSERT INTO players (id, nickname) VALUES ('152890357451849728', 'biker');
+INSERT INTO players (id, nickname) VALUES ('154683533732872193', 'tranker');
+INSERT INTO players (id, nickname) VALUES ('171847167756075009', 'drago');
+INSERT INTO players (id, nickname) VALUES ('235697747351568384', 'mayday');
+INSERT INTO players (id, nickname) VALUES ('168894820155260928', 'dren');

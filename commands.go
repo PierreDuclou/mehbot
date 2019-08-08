@@ -5,6 +5,7 @@ import (
 	"log"
 	"mehbot/wast"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -99,9 +100,9 @@ var commands = []Command{
 		Alias:       "h",
 		Description: "Affiche la liste des commandes disponibles",
 		Authroles: []string{
-			config.baseroles["Guez"],
-			config.baseroles["Guezt"],
-			config.baseroles["Worms"],
+			config.roles["Guez"],
+			config.roles["Guezt"],
+			config.roles["Worms"],
 		},
 		Run: func(c Command, args []string) bool {
 			sendEmbed(0, c.Session, c.MessageData.ChannelID, usage)
@@ -112,8 +113,8 @@ var commands = []Command{
 		Name:        "wplayer",
 		Alias:       "wp",
 		Description: "Enregistre un nouveau joueur dans la base de données",
-		Usage:       "Profile : `!wp <PSEUDO> <ID DISCORD>`\n\nExemple :\n`!wp Connard 148841746661376000`",
-		Authroles:   []string{config.baseroles["Superguez"]},
+		Usage:       "Profile : `!wp <PSEUDO> <ID DISCORD>`\n\nExemple : `!wp Connard 148841746661376000`",
+		Authroles:   []string{config.roles["Superguez"]},
 		Run: func(c Command, args []string) bool {
 			if len(args) != 2 {
 				return false
@@ -166,9 +167,9 @@ var commands = []Command{
 		Alias:       "wpl",
 		Description: "Affiche la liste des joueurs de worms enregistrés",
 		Authroles: []string{
-			config.baseroles["Guez"],
-			config.baseroles["Guezt"],
-			config.baseroles["Worms"],
+			config.roles["Guez"],
+			config.roles["Guezt"],
+			config.roles["Worms"],
 		},
 		Run: func(c Command, args []string) bool {
 			players := []wast.Player{}
@@ -176,6 +177,11 @@ var commands = []Command{
 			nicknames := &discordgo.MessageEmbedField{Name: "Pseudo", Inline: true}
 			ids := &discordgo.MessageEmbedField{Name: "ID Discord", Inline: true}
 			messageFields := []*discordgo.MessageEmbedField{nicknames, ids}
+
+			if len(players) == 0 {
+				nicknames.Value = "-"
+				ids.Value = "-"
+			}
 
 			for _, player := range players {
 				nicknames.Value += player.Nickname + "\n"
@@ -190,13 +196,108 @@ var commands = []Command{
 		Name:        "wgame",
 		Alias:       "wg",
 		Description: "Enregistre une nouvelle partie de worms",
-		Usage: "Format requis pour chaque ligne :\n`[*]<PSEUDO> <NOMBRE DE KILLS> <NOMBRE DE MORTS> <DÉGÂTS>`" +
+		Usage: "Format requis pour chaque ligne :\n`[*]<PSEUDO> <NOMBRE DE VICTIMES> <NOMBRE DE MORTS> <DÉGÂTS>`" +
 			"\n\n- L'étoile désigne le vainqueur (**unique**) de la partie." +
 			"\n- Les joueurs doivent avoir été enregistrés dans la base de données au préalable." +
 			"\n- Les résultats de la partie doivent être écrit dans un bloc de code (entouré par trois backticks)." +
 			"\n\nExemple :\n```!wg ` ` `\n*seezah 16 0 4600\nitsuped 0 8 800\ntranker 0 8 200\n` ` ` ```",
-		Authroles: []string{config.baseroles["Superguez"]},
+		Authroles: []string{config.roles["Superguez"]},
 		Run: func(c Command, args []string) bool {
+			filtered := make([]string, 0)
+
+			for _, arg := range args {
+				arg = strings.Replace(arg, "```", "", -1)
+				if arg != "" {
+					filtered = append(filtered, arg)
+				}
+			}
+
+			chunks := chunk(filtered, 4)
+			var stats []*wast.Stats
+			winnerPicked := false
+			game := wast.Game{
+				CreatedAt: time.Now(),
+			}
+			db.FirstOrCreate(&game, game)
+
+			for _, chunk := range chunks {
+				if len(chunk) < 4 {
+					log.Println("error chunking Worms stats, chunks:", chunks)
+					sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+						&discordgo.MessageEmbedField{
+							Name:  "Erreur de format dans la commande",
+							Value: fmt.Sprintf("Une ou plusieurs informations manquantes.\nDernière ligne lue : \"%s\"", strings.Join(chunk, " ")),
+						},
+					})
+					return false
+				}
+
+				var nickname string
+
+				winner := strings.HasPrefix(chunk[0], "*")
+				if winner && winnerPicked {
+					sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+						&discordgo.MessageEmbedField{
+							Name:  "Erreur de saisie",
+							Value: "Il ne peut y avoir qu'un seul vainqueur (maximum) par partie",
+						},
+					})
+					return false
+				}
+
+				if winner {
+					winnerPicked = true
+					nickname = chunk[0][1:]
+				} else {
+					nickname = chunk[0]
+				}
+
+				player := wast.Player{}
+				db.First(&player, wast.Player{Nickname: nickname})
+
+				if player.ID == "" {
+					log.Printf("player not found: \"%s\"", nickname)
+					sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+						&discordgo.MessageEmbedField{
+							Name:  "Joueur inconnu",
+							Value: fmt.Sprintf("Aucun joueur nommé \"%s\" n'a été trouvé.\nUtiliser la commande **!wpl** pour afficher la liste des joueurs connus.", nickname),
+						},
+					})
+					return false
+				}
+
+				errCallback := func(errMessage string) {
+					log.Println("error parsing integer:", errMessage)
+					sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+						&discordgo.MessageEmbedField{
+							Name:  "Erreur de saisie",
+							Value: errMessage,
+						},
+					})
+				}
+
+				kills, ok := parseInt(chunk[1], 10, 32, "Nombre de victimes non valide : "+chunk[1], errCallback)
+				deaths, ok := parseInt(chunk[2], 10, 32, "Nombre de morts non valide : "+chunk[2], errCallback)
+				damage, ok := parseInt(chunk[3], 10, 32, "Dégâts non valide : "+chunk[3], errCallback)
+
+				if !ok {
+					return false
+				}
+
+				stats = append(stats, &wast.Stats{
+					Kills:    int(kills),
+					Deaths:   int(deaths),
+					Damage:   int(damage),
+					Winner:   winner,
+					PlayerID: player.ID,
+					GameID:   game.ID,
+				})
+			}
+
+			for _, stat := range stats {
+				db.Create(stat)
+			}
+
 			return true
 		},
 	},
@@ -204,7 +305,7 @@ var commands = []Command{
 		Name:        "wranking",
 		Alias:       "wr",
 		Description: "Prochainement...",
-		Authroles:   []string{config.baseroles["Worms"]},
+		Authroles:   []string{config.roles["Worms"]},
 		Run: func(c Command, args []string) bool {
 			return true
 		},
@@ -213,7 +314,7 @@ var commands = []Command{
 		Name:        "wstats",
 		Alias:       "ws",
 		Description: "Prochainement...",
-		Authroles:   []string{config.baseroles["Worms"]},
+		Authroles:   []string{config.roles["Worms"]},
 		Run: func(c Command, args []string) bool {
 			return true
 		},
