@@ -1,4 +1,4 @@
-module github.com/jayreap/mehbot
+module mehbot
 
 go 1.12
 
