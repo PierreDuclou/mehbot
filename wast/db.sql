@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS players;
 
 CREATE TABLE players (
-  id SERIAL NOT NULL,
+  id VARCHAR(32) NOT NULL,
   nickname VARCHAR(255) NOT NULL,
   discord_tag VARCHAR(255) NOT NULL,
   PRIMARY KEY(id)
@@ -27,7 +27,7 @@ CREATE TABLE stats (
   deaths SMALLINT,
   damage SMALLINT,
   winner BOOLEAN,
-  player_id INTEGER NOT NULL,
+  player_id VARCHAR(32) NOT NULL,
   game_id INTEGER NOT NULL,
   PRIMARY KEY(id),
   CONSTRAINT fk_player_id FOREIGN KEY(player_id) REFERENCES players(id),
