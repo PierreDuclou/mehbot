@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 )
 
 // messageType: -1 = error, 0 = standard, 1 = success
-func sendEmbed(messageType int, session *discordgo.Session, channelID string, fields []*discordgo.MessageEmbedField) error {
+func sendEmbed(messageType int, session *discordgo.Session, channelID string, fields []*discordgo.MessageEmbedField) {
 	message := &discordgo.MessageEmbed{}
 
 	switch messageType {
@@ -21,7 +23,7 @@ func sendEmbed(messageType int, session *discordgo.Session, channelID string, fi
 		message.Fields = append(message.Fields, field)
 	}
 
-	_, err := session.ChannelMessageSendEmbed(channelID, message)
-
-	return err
+	if _, err := session.ChannelMessageSendEmbed(channelID, message); err != nil {
+		log.Println("error sending embed message:\n\t", err)
+	}
 }

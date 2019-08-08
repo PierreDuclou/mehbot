@@ -27,10 +27,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if !command.Authorized(s, m) {
-		s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+" ***FERME LA CHIIIIIEEEENNE***")
 		log.Printf("unauthorized user \"%s\" typed:\"%s\"\n", m.Author.String(), m.Content)
 		return
 	}
 
+	log.Printf("command %s called by user \"%s\":\"%s\"\n", cmdname, m.Author.String(), m.Content)
 	command.Execute(args)
 }

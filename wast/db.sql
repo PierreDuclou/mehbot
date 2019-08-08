@@ -11,7 +11,6 @@ DROP TABLE IF EXISTS players;
 CREATE TABLE players (
   id VARCHAR(32) NOT NULL,
   nickname VARCHAR(255) NOT NULL,
-  discord_tag VARCHAR(255) NOT NULL,
   PRIMARY KEY(id)
 );
 

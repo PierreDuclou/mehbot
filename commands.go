@@ -3,14 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"mehbot/wast"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-var usage = &discordgo.MessageEmbed{
-	Title: "Liste des commandes disponibles",
-	Color: 0x00dbac,
-}
+var usage []*discordgo.MessageEmbedField
 
 func init() {
 	cmdnames := discordgo.MessageEmbedField{Name: "Commande", Inline: true}
@@ -21,7 +19,7 @@ func init() {
 		cmddesc.Value += c.Description + "\n"
 	}
 
-	usage.Fields = []*discordgo.MessageEmbedField{&cmdnames, &cmddesc}
+	usage = []*discordgo.MessageEmbedField{&cmdnames, &cmddesc}
 }
 
 // Command represents a basic command provided to users
@@ -41,16 +39,13 @@ func (c Command) Execute(args []string) {
 	ok := c.Run(c, args)
 
 	if !ok {
-		err := sendEmbed(0, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+		log.Printf("command %s failed to execute, args: %s\n", c.Name, args)
+		sendEmbed(0, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
 				Value: c.Description + ".\n\n" + c.Usage,
 			},
 		})
-
-		if err != nil {
-			log.Println(err)
-		}
 	}
 }
 
@@ -97,12 +92,7 @@ var commands = []Command{
 			config.baseroles["Worms"],
 		},
 		Run: func(c Command, args []string) bool {
-			_, err := c.Session.ChannelMessageSendEmbed(c.MessageData.ChannelID, usage)
-
-			if err != nil {
-				log.Println("error sending embed message:", err)
-			}
-
+			sendEmbed(0, c.Session, c.MessageData.ChannelID, usage)
 			return true
 		},
 	},
@@ -113,6 +103,43 @@ var commands = []Command{
 		Usage:       "Profile : `!wp <PSEUDO> <ID DISCORD>`\n\nExemple :\n`!wp Connard 148841746661376000`",
 		Authroles:   []string{config.baseroles["Superguez"]},
 		Run: func(c Command, args []string) bool {
+			if len(args) != 2 {
+				return false
+			}
+
+			nickname := args[0]
+			id := args[1]
+
+			if _, err := c.Session.GuildMember(c.MessageData.GuildID, id); err != nil {
+				log.Println("error creating player:\n\t", err)
+				return false
+			}
+
+			player := wast.NewPlayer(id, nickname)
+			existing := &wast.Player{}
+			db.First(&existing, &wast.Player{ID: id})
+
+			if player.ID == existing.ID {
+				sendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+					&discordgo.MessageEmbedField{
+						Name:  "Identifiant non disponible",
+						Value: existing.Nickname + " " + existing.ID,
+					},
+				})
+
+				log.Println("error creating new player (ID already taken):", id, nickname)
+				return false
+			}
+
+			db.Create(player)
+			log.Println("created new player:", player.Nickname, player.ID)
+			sendEmbed(1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name:  "Joueur enregistré",
+					Value: nickname + " " + id,
+				},
+			})
+
 			return true
 		},
 	},
