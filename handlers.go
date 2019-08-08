@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"mehbot/commands"
+	"mehbot/config"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,13 +15,13 @@ var handlers = []interface{}{
 
 // messageCreate is called whenever a message is pushed in a known channel
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if !strings.HasPrefix(m.Message.Content, config.prefix) {
+	if !strings.HasPrefix(m.Message.Content, config.Prefix) {
 		return
 	}
 
 	cmdname := strings.Fields(m.Message.Content)[0][1:]
 	args := strings.Fields(m.Message.Content)[1:]
-	command := GetCommand(cmdname, s, m)
+	command := commands.GetCommand(cmdname, s, m)
 
 	if command == nil {
 		log.Printf("unknown command \"%s\" called by user %s", cmdname, m.Author.String())

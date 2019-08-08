@@ -1,0 +1,46 @@
+package commands
+
+import (
+	"mehbot/config"
+	"mehbot/util"
+	"mehbot/wast"
+
+	"github.com/bwmarrin/discordgo"
+)
+
+func newWPlayerListCommand() *Command {
+	cmd := Command{
+		Name:        "wplayerlist",
+		Alias:       "wpl",
+		Description: "Affiche la liste des joueurs de worms enregistrés",
+		Authroles: []string{
+			config.Roles["Guez"],
+			config.Roles["Guezt"],
+			config.Roles["Worms"],
+		},
+		Run: runWPlayerListCommand,
+	}
+
+	return &cmd
+}
+
+func runWPlayerListCommand(c Command, args []string) bool {
+	players := []wast.Player{}
+	wast.Db.Find(&players)
+	nicknames := &discordgo.MessageEmbedField{Name: "Pseudo", Inline: true}
+	ids := &discordgo.MessageEmbedField{Name: "ID Discord", Inline: true}
+	messageFields := []*discordgo.MessageEmbedField{nicknames, ids}
+
+	if len(players) == 0 {
+		nicknames.Value = "-"
+		ids.Value = "-"
+	}
+
+	for _, player := range players {
+		nicknames.Value += player.Nickname + "\n"
+		ids.Value += player.ID + "\n"
+	}
+
+	util.SendEmbed(0, c.Session, c.MessageData.ChannelID, messageFields)
+	return true
+}

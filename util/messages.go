@@ -1,22 +1,24 @@
-package main
+package util
 
 import (
 	"log"
+	"mehbot/config"
 
 	"github.com/bwmarrin/discordgo"
 )
 
+// SendEmbed is a helper allowing to send embed messages
 // messageType: -1 = error, 0 = standard, 1 = success
-func sendEmbed(messageType int, session *discordgo.Session, channelID string, fields []*discordgo.MessageEmbedField) {
+func SendEmbed(messageType int, session *discordgo.Session, channelID string, fields []*discordgo.MessageEmbedField) {
 	message := &discordgo.MessageEmbed{}
 
 	switch messageType {
 	case 1:
-		message.Color = config.successColor
+		message.Color = config.SuccessColor
 	case -1:
-		message.Color = config.errorColor
+		message.Color = config.ErrorColor
 	default:
-		message.Color = config.messageColor
+		message.Color = config.MessageColor
 	}
 
 	for _, field := range fields {
