@@ -104,41 +104,33 @@ func filterArgs(args []string) []string {
 
 func throwChunkingError(c Command, chunk []string) {
 	log.Println("error chunking Worms stats, last chunk:", chunk)
-	util.SendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Erreur de format dans la commande",
-			Value: fmt.Sprintf("Une ou plusieurs informations manquantes dans la ligne :\n\"%s\"", strings.Join(chunk, " ")),
-		},
-	})
+	util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		Name:  "Erreur de format dans la commande",
+		Value: fmt.Sprintf("Une ou plusieurs informations manquantes dans la ligne :\n\"%s\"", strings.Join(chunk, " ")),
+	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
 func throwWinnerError(c Command) {
-	util.SendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Erreur de saisie",
-			Value: "Il ne peut y avoir qu'un seul vainqueur (maximum) par partie",
-		},
-	})
+	util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		Name:  "Erreur de saisie",
+		Value: "Il ne peut y avoir qu'un seul vainqueur (maximum) par partie",
+	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
 func throwPlayerNotFoundError(c Command, nickname string) {
 	log.Printf("player not found: \"%s\"", nickname)
-	util.SendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Joueur inconnu",
-			Value: fmt.Sprintf("Aucun joueur nommé \"%s\" n'a été trouvé.\nUtiliser la commande **!wpl** pour afficher la liste des joueurs connus.", nickname),
-		},
-	})
+	util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		Name:  "Joueur inconnu",
+		Value: fmt.Sprintf("Aucun joueur nommé \"%s\" n'a été trouvé.\nUtiliser la commande **!wpl** pour afficher la liste des joueurs connus.", nickname),
+	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
 func throwParseIntError(c Command, chunk []string) {
 	log.Printf("error parsing integer in chunk: \"%s\"\n", chunk)
-	util.SendEmbed(-1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Erreur de saisie",
-			Value: fmt.Sprintf("Une ou plusieurs valeurs numériques non valides sur la ligne :\n\"%s\"", strings.Join(chunk, " ")),
-		},
-	})
+	util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		Name:  "Erreur de saisie",
+		Value: fmt.Sprintf("Une ou plusieurs valeurs numériques non valides sur la ligne :\n\"%s\"", strings.Join(chunk, " ")),
+	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
 func parseScore(buf *[3]string) (int, int, int, bool) {
@@ -159,11 +151,21 @@ func parseScore(buf *[3]string) (int, int, int, bool) {
 
 func notifyCommandSuccess(c Command, stats []*wast.Stats) {
 	log.Printf("new game inserted: %v\n", stats)
+	format := "%-12s %-12v %-12v %-12v\n"
+	field := &discordgo.MessageEmbedField{Name: "Nouvelle partie enregistrée"}
+	field.Value = fmt.Sprintf("```"+format, "Joueur", "Victimes", "Morts", "Dégâts")
+	field.Value += strings.Repeat("-", 45) + "\n"
 
-	util.SendEmbed(1, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Nouvelle partie enregistrée",
-			Value: fmt.Sprintf("%v", stats),
-		},
-	})
+	for _, stat := range stats {
+		victory := ""
+
+		if stat.Winner {
+			victory = "*"
+		}
+
+		field.Value += fmt.Sprintf(format, victory+stat.Player.Nickname, stat.Kills, stat.Deaths, stat.Damage)
+	}
+
+	field.Value += "```"
+	util.NewMessage(1).WithFields(field).Send(c.Session, c.MessageData.ChannelID)
 }

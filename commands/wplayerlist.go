@@ -41,6 +41,6 @@ func runWPlayerListCommand(c Command, args []string) bool {
 		ids.Value += player.ID + "\n"
 	}
 
-	util.SendEmbed(0, c.Session, c.MessageData.ChannelID, messageFields)
+	util.NewMessage(0).WithFields(messageFields...).Send(c.Session, c.MessageData.ChannelID)
 	return true
 }

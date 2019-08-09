@@ -16,7 +16,7 @@ func newHelpCommand() *Command {
 			config.Roles["Worms"],
 		},
 		Run: func(c Command, args []string) bool {
-			util.SendEmbed(0, c.Session, c.MessageData.ChannelID, usage)
+			util.NewMessage(0).WithTitle("Liste des commandes").WithFields(usage...).Send(c.Session, c.MessageData.ChannelID)
 			return true
 		},
 	}

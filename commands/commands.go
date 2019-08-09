@@ -66,12 +66,10 @@ type Command struct {
 }
 
 func (c Command) printUsage() {
-	util.SendEmbed(0, c.Session, c.MessageData.ChannelID, []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
-			Value: c.Description + ".\n\n" + c.Usage,
-		},
-	})
+	util.NewMessage(0).WithFields(&discordgo.MessageEmbedField{
+		Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
+		Value: c.Description + ".\n\n" + c.Usage,
+	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
 // Execute is a façade to execute the Run() function of the command
