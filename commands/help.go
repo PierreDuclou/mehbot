@@ -10,7 +10,7 @@ func newHelpCommand() *Command {
 		Name:        "help",
 		Alias:       "h",
 		Description: "Affiche la liste des commandes disponibles",
-		Authroles: []string{
+		AuthorizedRoles: []string{
 			config.Roles["Guez"],
 			config.Roles["Guezt"],
 			config.Roles["Worms"],

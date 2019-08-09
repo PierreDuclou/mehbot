@@ -13,6 +13,18 @@ type Stats struct {
 	GameID   uint
 }
 
+// NewStats returns a pointer to a new Stats instance
+func NewStats(kills int, deaths int, damage int, winner bool, playerID string, gameID uint) *Stats {
+	return &Stats{
+		Kills:    kills,
+		Deaths:   deaths,
+		Damage:   damage,
+		Winner:   winner,
+		PlayerID: playerID,
+		GameID:   gameID,
+	}
+}
+
 // score returns the final player score for a certain game
 func (s Stats) score() int {
 	return (damageScore(s.Damage) + killingScore(s.Kills) + victoryScore(s.Winner)) - MaxScore/2

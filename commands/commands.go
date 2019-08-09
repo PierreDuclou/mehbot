@@ -55,14 +55,14 @@ func GetCommand(name string, s *discordgo.Session, m *discordgo.MessageCreate) *
 
 // Command represents a basic command provided to users
 type Command struct {
-	Name        string
-	Alias       string
-	Description string
-	Usage       string
-	Authroles   []string
-	Session     *discordgo.Session
-	MessageData *discordgo.MessageCreate
-	Run         func(Command, []string) bool
+	Name            string
+	Alias           string
+	Description     string
+	Usage           string
+	AuthorizedRoles []string
+	Session         *discordgo.Session
+	MessageData     *discordgo.MessageCreate
+	Run             func(Command, []string) bool
 }
 
 func (c Command) printUsage() {
@@ -100,7 +100,7 @@ func (c Command) Authorized(s *discordgo.Session, m *discordgo.MessageCreate) bo
 	}
 
 	for _, role := range member.Roles {
-		for _, authrole := range c.Authroles {
+		for _, authrole := range c.AuthorizedRoles {
 			if role == authrole {
 				return true
 			}

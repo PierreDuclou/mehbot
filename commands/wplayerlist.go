@@ -13,7 +13,7 @@ func newWPlayerListCommand() *Command {
 		Name:        "wplayerlist",
 		Alias:       "wpl",
 		Description: "Affiche la liste des joueurs de worms enregistrés",
-		Authroles: []string{
+		AuthorizedRoles: []string{
 			config.Roles["Guez"],
 			config.Roles["Guezt"],
 			config.Roles["Worms"],

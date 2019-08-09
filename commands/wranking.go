@@ -7,7 +7,7 @@ func newWRankingCommand() *Command {
 		Name:        "wranking",
 		Alias:       "wr",
 		Description: "Prochainement...",
-		Authroles:   []string{config.Roles["Worms"]},
+		AuthorizedRoles:   []string{config.Roles["Worms"]},
 		Run: func(c Command, args []string) bool {
 			return true
 		},

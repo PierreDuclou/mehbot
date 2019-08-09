@@ -7,7 +7,7 @@ func newWStatsCommand() *Command {
 		Name:        "wstats",
 		Alias:       "ws",
 		Description: "Prochainement...",
-		Authroles:   []string{config.Roles["Worms"]},
+		AuthorizedRoles:   []string{config.Roles["Worms"]},
 		Run: func(c Command, args []string) bool {
 			return true
 		},

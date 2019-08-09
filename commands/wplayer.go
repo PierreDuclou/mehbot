@@ -15,7 +15,7 @@ func newWPlayerCommand() *Command {
 		Alias:       "wp",
 		Description: "Enregistre un nouveau joueur dans la base de données",
 		Usage:       "Profile : `!wp <PSEUDO> <ID DISCORD>`\n\nExemple : `!wp Connard 148841746661376000`",
-		Authroles:   []string{config.Roles["Superguez"]},
+		AuthorizedRoles:   []string{config.Roles["Superguez"]},
 		Run:         runWPlayerCommand,
 	}
 
