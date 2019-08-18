@@ -2,7 +2,7 @@ package commands
 
 import (
 	"mehbot/config"
-	"mehbot/util"
+	"mehbot/messages"
 )
 
 func newHelpCommand() *Command {
@@ -16,7 +16,7 @@ func newHelpCommand() *Command {
 			config.Roles["Worms"],
 		},
 		Run: func(c Command, args []string) bool {
-			util.NewMessage(0).WithTitle("Liste des commandes").WithFields(usage...).Send(c.Session, c.MessageData.ChannelID)
+			messages.NewMessageEmbed().WithTitle("Liste des commandes").WithFields(usage...).Send(c.Session, c.MessageData.ChannelID)
 			return true
 		},
 	}

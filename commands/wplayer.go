@@ -3,7 +3,7 @@ package commands
 import (
 	"log"
 	"mehbot/config"
-	"mehbot/util"
+	"mehbot/messages"
 	"mehbot/wast"
 
 	"github.com/bwmarrin/discordgo"
@@ -32,7 +32,7 @@ func runWPlayerCommand(c Command, args []string) bool {
 
 	if _, err := c.Session.GuildMember(c.MessageData.GuildID, id); err != nil {
 		log.Println("error creating player:", err)
-		util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		messages.NewErrorMessage().WithFields(&discordgo.MessageEmbedField{
 			Name:  "ID Discord inconnu au bataillon",
 			Value: id,
 		}).Send(c.Session, c.MessageData.ChannelID)
@@ -44,7 +44,7 @@ func runWPlayerCommand(c Command, args []string) bool {
 	wast.Db.First(&existing, &wast.Player{ID: id})
 
 	if player.ID == existing.ID {
-		util.NewMessage(-1).WithFields(&discordgo.MessageEmbedField{
+		messages.NewErrorMessage().WithFields(&discordgo.MessageEmbedField{
 			Name:  "Identifiant non disponible",
 			Value: existing.Nickname + " " + existing.ID,
 		}).Send(c.Session, c.MessageData.ChannelID)
@@ -55,7 +55,7 @@ func runWPlayerCommand(c Command, args []string) bool {
 
 	wast.Db.Create(player)
 	log.Println("created new player:", player.Nickname, player.ID)
-	util.NewMessage(1).WithFields(&discordgo.MessageEmbedField{
+	messages.NewSuccessMessage().WithFields(&discordgo.MessageEmbedField{
 		Name:  "Joueur enregistré",
 		Value: nickname + " " + id,
 	}).Send(c.Session, c.MessageData.ChannelID)

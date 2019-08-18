@@ -11,8 +11,8 @@ var Roles = map[string]string{
 	"Superguez": "336920690030673921",
 }
 
-// MessageColor is used for standard embed messages
-var MessageColor = 0x5f6eff
+// StandardColor is used for standard embed messages
+var StandardColor = 0x5f6eff
 
 // SuccessColor is used for success embed messages
 var SuccessColor = 0x34cc41

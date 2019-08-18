@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"mehbot/config"
-	"mehbot/util"
+	"mehbot/messages"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -66,7 +66,7 @@ type Command struct {
 }
 
 func (c Command) printUsage() {
-	util.NewMessage(0).WithFields(&discordgo.MessageEmbedField{
+	messages.NewMessageEmbed().WithFields(&discordgo.MessageEmbedField{
 		Name:  fmt.Sprintf("Utilisation de la commande **!%s**", c.Name),
 		Value: c.Description + ".\n\n" + c.Usage,
 	}).Send(c.Session, c.MessageData.ChannelID)

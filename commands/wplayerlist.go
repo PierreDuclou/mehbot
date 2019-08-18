@@ -2,7 +2,7 @@ package commands
 
 import (
 	"mehbot/config"
-	"mehbot/util"
+	"mehbot/messages"
 	"mehbot/wast"
 
 	"github.com/bwmarrin/discordgo"
@@ -41,6 +41,6 @@ func runWPlayerListCommand(c Command, args []string) bool {
 		ids.Value += player.ID + "\n"
 	}
 
-	util.NewMessage(0).WithFields(messageFields...).Send(c.Session, c.MessageData.ChannelID)
+	messages.NewMessageEmbed().WithFields(messageFields...).Send(c.Session, c.MessageData.ChannelID)
 	return true
 }
