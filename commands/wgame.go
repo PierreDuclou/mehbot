@@ -39,7 +39,6 @@ func runWGameCommand(c Command, args []string) bool {
 	game := wast.Game{
 		CreatedAt: time.Now(),
 	}
-	wast.Db.FirstOrCreate(&game, game)
 
 	for _, chunk := range chunks {
 		if len(chunk) < 4 {
@@ -77,12 +76,15 @@ func runWGameCommand(c Command, args []string) bool {
 			return false
 		}
 
-		stat := wast.NewStats(int(kills), int(deaths), int(damage), winner, player.ID, game.ID)
+		stat := wast.NewStats(int(kills), int(deaths), int(damage), winner, player.ID, 0)
 		stat.Player = player
 		stats = append(stats, stat)
 	}
 
+	wast.Db.FirstOrCreate(&game, game)
+
 	for _, stat := range stats {
+		stat.GameID = game.ID
 		wast.Db.Create(stat)
 	}
 
@@ -105,9 +107,9 @@ func filterArgs(args []string) []string {
 
 func throwChunkingError(c Command, chunk []string) {
 	log.Println("error chunking Worms stats, last chunk:", chunk)
-	messages.NewSuccessMessage().WithFields(&discordgo.MessageEmbedField{
+	messages.NewErrorMessage().WithFields(&discordgo.MessageEmbedField{
 		Name:  "Erreur de format dans la commande",
-		Value: fmt.Sprintf("Une ou plusieurs informations manquantes dans la ligne :\n\"%s\"", strings.Join(chunk, " ")),
+		Value: fmt.Sprintf("Une ou plusieurs informations manquantes :\n\"%s\"", strings.Join(chunk, " ")),
 	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
@@ -122,7 +124,7 @@ func throwPlayerNotFoundError(c Command, nickname string) {
 	log.Printf("player not found: \"%s\"", nickname)
 	messages.NewErrorMessage().WithFields(&discordgo.MessageEmbedField{
 		Name:  "Joueur inconnu",
-		Value: fmt.Sprintf("Aucun joueur nommé \"%s\" n'a été trouvé.\nUtiliser la commande **!wpl** pour afficher la liste des joueurs connus.", nickname),
+		Value: fmt.Sprintf("Aucun joueur nommé \"%s\" n'a été trouvé.\nUtiliser la commande **!wpl** pour afficher la liste des joueurs enregistrés.", nickname),
 	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
@@ -130,7 +132,7 @@ func throwParseIntError(c Command, chunk []string) {
 	log.Printf("error parsing integer in chunk: \"%s\"\n", chunk)
 	messages.NewErrorMessage().WithFields(&discordgo.MessageEmbedField{
 		Name:  "Erreur de saisie",
-		Value: fmt.Sprintf("Une ou plusieurs valeurs numériques non valides sur la ligne :\n\"%s\"", strings.Join(chunk, " ")),
+		Value: fmt.Sprintf("Une ou plusieurs valeurs numériques non valides :\n\"%s\"", strings.Join(chunk, " ")),
 	}).Send(c.Session, c.MessageData.ChannelID)
 }
 
