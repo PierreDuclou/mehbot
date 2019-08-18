@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"mehbot/commands"
-	"mehbot/config"
 	"strings"
+
+	"github.com/PierreDuclou/mehbot/commands"
+	"github.com/PierreDuclou/mehbot/config"
 
 	"github.com/bwmarrin/discordgo"
 )

@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"mehbot/config"
-	"mehbot/messages"
+	"github.com/PierreDuclou/mehbot/config"
+	"github.com/PierreDuclou/mehbot/messages"
 )
 
 func newHelpCommand() *Command {

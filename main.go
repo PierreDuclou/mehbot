@@ -5,8 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func main() {

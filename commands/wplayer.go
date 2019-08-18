@@ -2,9 +2,10 @@ package commands
 
 import (
 	"log"
-	"mehbot/config"
-	"mehbot/messages"
-	"mehbot/wast"
+
+	"github.com/PierreDuclou/mehbot/config"
+	"github.com/PierreDuclou/mehbot/messages"
+	"github.com/PierreDuclou/mehbot/wast"
 
 	"github.com/bwmarrin/discordgo"
 )

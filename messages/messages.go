@@ -2,7 +2,8 @@ package messages
 
 import (
 	"log"
-	"mehbot/config"
+
+	"github.com/PierreDuclou/mehbot/config"
 
 	"github.com/bwmarrin/discordgo"
 )

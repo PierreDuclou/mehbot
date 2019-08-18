@@ -3,9 +3,10 @@ package commands
 import (
 	"fmt"
 	"log"
-	"mehbot/config"
-	"mehbot/messages"
 	"strings"
+
+	"github.com/PierreDuclou/mehbot/config"
+	"github.com/PierreDuclou/mehbot/messages"
 
 	"github.com/bwmarrin/discordgo"
 )

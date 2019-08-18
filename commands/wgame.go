@@ -3,13 +3,14 @@ package commands
 import (
 	"fmt"
 	"log"
-	"mehbot/config"
-	"mehbot/messages"
-	"mehbot/util"
-	"mehbot/wast"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/PierreDuclou/mehbot/config"
+	"github.com/PierreDuclou/mehbot/messages"
+	"github.com/PierreDuclou/mehbot/util"
+	"github.com/PierreDuclou/mehbot/wast"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -36,9 +37,6 @@ func runWGameCommand(c Command, args []string) bool {
 	chunks := util.Chunk(filtered, 4)
 	var stats []*wast.Stats
 	winnerPicked := false
-	game := wast.Game{
-		CreatedAt: time.Now(),
-	}
 
 	for _, chunk := range chunks {
 		if len(chunk) < 4 {
@@ -47,8 +45,8 @@ func runWGameCommand(c Command, args []string) bool {
 		}
 
 		var nickname string
-
 		winner := strings.HasPrefix(chunk[0], "*")
+
 		if winner && winnerPicked {
 			throwWinnerError(c)
 			return false
@@ -81,13 +79,7 @@ func runWGameCommand(c Command, args []string) bool {
 		stats = append(stats, stat)
 	}
 
-	wast.Db.FirstOrCreate(&game, game)
-
-	for _, stat := range stats {
-		stat.GameID = game.ID
-		wast.Db.Create(stat)
-	}
-
+	insertStats(stats)
 	notifyCommandSuccess(c, stats)
 	return true
 }
@@ -150,6 +142,19 @@ func parseScore(buf *[3]string) (int, int, int, bool) {
 	}
 
 	return values[0], values[1], values[2], true
+}
+
+func insertStats(stats []*wast.Stats) {
+	game := wast.Game{
+		CreatedAt: time.Now(),
+	}
+
+	wast.Db.FirstOrCreate(&game, game)
+
+	for _, stat := range stats {
+		stat.GameID = game.ID
+		wast.Db.Create(stat)
+	}
 }
 
 func notifyCommandSuccess(c Command, stats []*wast.Stats) {
